@@ -1,0 +1,3 @@
+module SwiftIAP {
+    header "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAP.build/include/SwiftIAP-Swift.h"
+}

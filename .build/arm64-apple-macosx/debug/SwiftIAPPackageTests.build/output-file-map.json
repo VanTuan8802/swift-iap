@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/master.swiftdeps"
+  },
+  "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/runner.d",
+    "object": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/vantuan88/Downloads/IAP/swift-iap/.build/arm64-apple-macosx/debug/SwiftIAPPackageTests.build/runner.dia"
+  }
+}
