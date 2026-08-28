@@ -155,8 +155,15 @@ public final class StoreContext: ObservableObject, @unchecked Sendable {
     }
 
     /// Re-reads all valid transactions from StoreKit and updates `purchasedProductIds`.
+    ///
+    /// - Returns: number of valid transactions found. Callers that need to
+    ///   branch on the result MUST use this return value — `purchasedProductIds`
+    ///   is republished via `DispatchQueue.main.async` (see
+    ///   `purchaseTransactions.didSet`) and is therefore still stale when this
+    ///   method returns.
     @MainActor
-    public func updatePurchases() async throws {
+    @discardableResult
+    public func updatePurchases() async throws -> Int {
         var transactions: [Transaction] = []
         for id in productIds {
             if let tx = try await getValidTransaction(for: id) {
@@ -164,13 +171,19 @@ public final class StoreContext: ObservableObject, @unchecked Sendable {
             }
         }
         purchaseTransactions = transactions
+        return transactions.count
     }
 
     /// Asks the App Store to restore previous purchases, then refreshes state.
+    ///
+    /// - Returns: number of valid transactions found after the sync (see
+    ///   `updatePurchases()` for why the return value, not
+    ///   `purchasedProductIds`, must be used for decisions).
     @MainActor
-    public func restorePurchases() async throws {
+    @discardableResult
+    public func restorePurchases() async throws -> Int {
         try await AppStore.sync()
-        try await updatePurchases()
+        return try await updatePurchases()
     }
 
     /// Replaces the current product list, keeping the order defined by `productIds`.
@@ -261,6 +274,12 @@ public final class StoreContext: ObservableObject, @unchecked Sendable {
                     let transaction = try Self.verify(result)
                     await transaction.finish()
                     await self.updatePurchaseTransactions(with: transaction)
+                    // Keep the fast `isPremium` cache in sync immediately —
+                    // without this, an Ask-to-Buy approval or renewal that
+                    // arrives while the app is foregrounded unlocks the UI
+                    // (via `purchasedProductIds`) but ads/gates keep reading
+                    // a stale `false` until the next foreground refresh.
+                    await IAPHelper.shared.refreshFromStoreKit()
                 } catch {
                     iapLog("🚨 Transaction listener error: \(error.localizedDescription)")
                 }

@@ -205,15 +205,23 @@ public final class IAPManager: ObservableObject {
 
         Task {
             do {
-                try await store?.restorePurchases()
+                // Dùng số transaction TRẢ VỀ từ restore — `purchasedProductIds`
+                // được republish qua `DispatchQueue.main.async` nên đọc ngay
+                // sau await vẫn là giá trị cũ. Trên máy cài mới (persisted
+                // rỗng) điều đó từng làm restore thành công nhưng báo
+                // "no purchases found" và bỏ qua bước refresh cache.
+                var restoredCount = 0
+                if let store {
+                    restoredCount = try await store.restorePurchases()
+                }
                 self.isLoading = false
 
-                let restoredCount = store?.purchasedProductIds.count ?? 0
                 if restoredCount > 0 {
                     await self.checkAndUpdateSubscriptionStatus()
 
                     if IAPHelper.shared.isPremium {
                         ads.setShouldShowAds(false)
+                        ads.setExcludeScreen(false)
                         self.restoreSuccessful = true
                         self.showingPurchaseAlert = true
                     } else {
@@ -302,12 +310,19 @@ public final class IAPManager: ObservableObject {
 
                         iapLog("✅ Purchase success: \(transaction.productID)")
 
-                        self.errorMessage = nil
-                        self.showingPurchaseAlert = true
                         self.setSelectedProduct(nil)
                         ads.setShouldShowAds(false)
-                        IAPHelper.shared.refreshFromCache()
+                        // Cache `iap_is_premium` phải ĐÚNG trước khi bật
+                        // `showingPurchaseAlert` — host app dùng cờ này làm
+                        // tín hiệu dismiss paywall, và ngay sau dismiss có thể
+                        // show interstitial được gate bằng cache đó. Đảo thứ
+                        // tự là có cửa sổ vài chục ms user vừa trả tiền xong
+                        // vẫn ăn ad. (`refreshFromCache()` cũ bị xoá vì nó
+                        // no-op: đọc UserDefaults rồi ghi lại y nguyên.)
                         await self.checkAndUpdateSubscriptionStatus()
+                        ads.setExcludeScreen(false)
+                        self.errorMessage = nil
+                        self.showingPurchaseAlert = true
 
                         // Schedule free-trial expiration notification if applicable.
                         if let expirationDate = transaction.expirationDate {
