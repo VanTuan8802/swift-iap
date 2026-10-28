@@ -34,6 +34,7 @@ public final class IAPManager: ObservableObject {
     // Convenience accessors for injected services.
     private var ads: IAPAdsBridging { IAPConfiguration.shared.ads }
     private var trialNotifications: IAPTrialNotificationScheduling { IAPConfiguration.shared.trialNotifications }
+    private var purchaseObserver: IAPPurchaseObserving { IAPConfiguration.shared.purchaseObserver }
 
     private init() {}
 
@@ -224,6 +225,7 @@ public final class IAPManager: ObservableObject {
                         ads.setExcludeScreen(false)
                         self.restoreSuccessful = true
                         self.showingPurchaseAlert = true
+                        purchaseObserver.didRestore(count: restoredCount)
                     } else {
                         ads.setExcludeScreen(false)
                         self.errorMessage = "restore_completed".localized
@@ -323,6 +325,17 @@ public final class IAPManager: ObservableObject {
                         ads.setExcludeScreen(false)
                         self.errorMessage = nil
                         self.showingPurchaseAlert = true
+
+                        purchaseObserver.didPurchase(
+                            IAPPurchaseInfo(
+                                productId: transaction.productID,
+                                transactionId: transaction.id,
+                                originalTransactionId: transaction.originalID,
+                                price: product.price,
+                                currencyCode: product.priceFormatStyle.currencyCode,
+                                expirationDate: transaction.expirationDate
+                            )
+                        )
 
                         // Schedule free-trial expiration notification if applicable.
                         if let expirationDate = transaction.expirationDate {

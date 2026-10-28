@@ -82,6 +82,20 @@ IAPConfiguration.shared.configure(
         remove:   { NotificationManager.shared.removeTrialEnd() }
     ),
 
+    // Optional — purchase analytics / attribution (default: no-op):
+    purchaseObserver: ClosureIAPPurchaseObserver(
+        didPurchase: { info in
+            let event = ADJEvent(eventToken: "abc123")!
+            if let price = info.price, let code = info.currencyCode {
+                event.setRevenue(NSDecimalNumber(decimal: price).doubleValue, currency: code)
+            }
+            event.setTransactionId(String(info.transactionId))   // dedupe
+            event.addCallbackParameter("product_id", value: info.productId)
+            Adjust.trackEvent(event)
+        },
+        didRestore: { _ in Adjust.trackEvent(ADJEvent(eventToken: "def456")!) }
+    ),
+
     // Optional — localization resolver (default: NSLocalizedString):
     localize: { NSLocalizedString($0, comment: "") },
 

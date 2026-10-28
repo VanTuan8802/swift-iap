@@ -35,6 +35,7 @@ public final class IAPConfiguration: @unchecked Sendable {
     public var remoteConfig: IAPRemoteConfigProviding = DefaultIAPRemoteConfig()
     public var ads: IAPAdsBridging = NoopIAPAdsBridging()
     public var trialNotifications: IAPTrialNotificationScheduling = NoopTrialNotificationScheduler()
+    public var purchaseObserver: IAPPurchaseObserving = NoopIAPPurchaseObserver()
 
     // MARK: Localization
 
@@ -69,6 +70,7 @@ public final class IAPConfiguration: @unchecked Sendable {
     ///   - remoteConfig: IAP master switch + free-tier limits.
     ///   - ads: optional ads SDK bridge.
     ///   - trialNotifications: optional trial-expiration notification bridge.
+    ///   - purchaseObserver: optional analytics/attribution sink for purchases.
     ///   - localize: optional localization resolver.
     ///   - persistenceKeyPrefix: optional `UserDefaults` namespace.
     ///   - enableLogging: verbose diagnostics toggle.
@@ -78,6 +80,7 @@ public final class IAPConfiguration: @unchecked Sendable {
         remoteConfig: IAPRemoteConfigProviding = DefaultIAPRemoteConfig(),
         ads: IAPAdsBridging = NoopIAPAdsBridging(),
         trialNotifications: IAPTrialNotificationScheduling = NoopTrialNotificationScheduler(),
+        purchaseObserver: IAPPurchaseObserving = NoopIAPPurchaseObserver(),
         localize: (@Sendable (String) -> String)? = nil,
         persistenceKeyPrefix: String? = nil,
         enableLogging: Bool = false
@@ -87,6 +90,7 @@ public final class IAPConfiguration: @unchecked Sendable {
         self.remoteConfig = remoteConfig
         self.ads = ads
         self.trialNotifications = trialNotifications
+        self.purchaseObserver = purchaseObserver
         if let localize { self.localize = localize }
         if let persistenceKeyPrefix { self.persistenceKeyPrefix = persistenceKeyPrefix }
         self.isLoggingEnabled = enableLogging
@@ -100,6 +104,7 @@ public final class IAPConfiguration: @unchecked Sendable {
         remoteConfig: IAPRemoteConfigProviding = DefaultIAPRemoteConfig(),
         ads: IAPAdsBridging = NoopIAPAdsBridging(),
         trialNotifications: IAPTrialNotificationScheduling = NoopTrialNotificationScheduler(),
+        purchaseObserver: IAPPurchaseObserving = NoopIAPPurchaseObserver(),
         localize: (@Sendable (String) -> String)? = nil,
         persistenceKeyPrefix: String? = nil,
         enableLogging: Bool = false
@@ -113,6 +118,7 @@ public final class IAPConfiguration: @unchecked Sendable {
             remoteConfig: remoteConfig,
             ads: ads,
             trialNotifications: trialNotifications,
+            purchaseObserver: purchaseObserver,
             localize: localize,
             persistenceKeyPrefix: persistenceKeyPrefix,
             enableLogging: enableLogging
